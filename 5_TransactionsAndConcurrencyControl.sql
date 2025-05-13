@@ -384,3 +384,405 @@
 -- periods, leading to data staleness and reduced accuracy.
 
 -- Transaction Isolation Levels in DBMS: --------------
+-- transaction isolation levels define the degree to which the operations in one transaction are isolated from the operations of other concurrent 
+-- transactions. In other words, it defines how and when the changes made by one transaction are visible to others to assure data consistency and 
+-- integrity.
+
+-- As we know, to maintain consistency in a database, it follows ACID properties. Among these four properties (Atomicity, Consistency, Isolation, 
+-- and Durability) Isolation determines how transaction integrity is visible to other users and systems. It means that a transaction should take 
+-- place in a system in such a way that it is the only transaction that is accessing the resources in a database system. 
+
+-- Isolation levels define the degree to which a transaction must be isolated from the data modifications made by any other transaction in the 
+-- database system. A transaction isolation level is defined by the following phenomena: 
+
+-- Dirty Read – A Dirty read is a situation when a transaction reads data that has not yet been committed. For example, Let’s say transaction 1 
+-- updates a row and leaves it uncommitted, meanwhile, Transaction 2 reads the updated row. If transaction 1 rolls back the change, transaction 2 
+-- will have read data that is considered never to have existed.
+
+-- Non Repeatable read – Non-repeatable read occurs when a transaction reads the same row twice and gets a different value each time. For 
+-- example, suppose transaction T1 reads data. Due to concurrency, another transaction T2 updates the same data and commit, Now if transaction 
+-- T1 rereads the same data, it will retrieve a different value.
+
+-- Phantom Read – Phantom Read occurs when two same queries are executed, but the rows retrieved by the two, are different. For example, 
+-- suppose transaction T1 retrieves a set of rows that satisfy some search criteria. Now, Transaction T2 generates some new rows that match the 
+-- search criteria for Transaction T1. If transaction T1 re-executes the statement that reads the rows, it gets a different set of rows this time.
+
+-- Based on these phenomena, The SQL standard defines four isolation levels:  
+-- Read Uncommitted – Read Uncommitted is the lowest isolation level. In this level, one transaction may read not yet committed changes made by 
+-- other transactions, thereby allowing dirty reads. At this level, transactions are not isolated from each other.
+-- Read Committed – This isolation level guarantees that any data read is committed at the moment it is read. Thus it does not allow dirty read. 
+-- The transaction holds a read or write lock on the current row, and thus prevents other transactions from reading, updating, or deleting it.
+-- Repeatable Read – This is the most restrictive isolation level. The transaction holds read locks on all rows it references and writes locks on 
+-- referenced rows for update and delete actions. Since other transactions cannot read, update or delete these rows, consequently it avoids 
+-- non-repeatable read.
+-- Serializable – This is the highest isolation level. A serializable execution is guaranteed to be serializable. Serializable execution is 
+-- defined to be an execution of operations in which concurrently executing transactions appears to be serially executing.
+
+-- Advantages of Transaction Isolation Levels:
+-- Improved concurrency: Transaction isolation levels can improve concurrency by allowing multiple transactions to run concurrently without 
+-- interfering with each other.
+-- Control over data consistency: Isolation levels provide control over the level of data consistency required by a particular application.
+-- Reduced data anomalies: The use of isolation levels can reduce data anomalies such as dirty reads, non-repeatable reads, and phantom reads.
+-- Flexibility: The use of different isolation levels provides flexibility in designing applications that require different levels of data 
+-- consistency.
+
+-- Disadvantages of Transaction Isolation Levels:
+-- Increased overhead: The use of isolation levels can increase overhead because the database management system must perform additional checks 
+-- and acquire more locks.
+-- Decreased concurrency: Some isolation levels, such as Serializable, can decrease concurrency by requiring transactions to acquire more 
+-- locks, which can lead to blocking.
+-- Limited support: Not all database management systems support all isolation levels, which can limit the portability of applications across 
+-- different systems.
+-- Complexity: The use of different isolation levels can add complexity to the design of database applications, making them more difficult 
+-- to implement and maintain.
+
+-- Log based Recovery in DBMS: --------------
+-- Log-based recovery in DBMS ensures data can be maintained or restored in the event of a system failure. The DBMS records every transaction 
+-- on stable storage, allowing for easy data recovery when a failure occurs. For each operation performed on the database, a log file is 
+-- created. Transactions are logged and verified before being applied to the database, ensuring data integrity.
+
+-- Log in DBMS: A log is a sequence of records that document the operations performed during database transactions. Logs are stored in a log file 
+-- for each transaction, providing a mechanism to recover data in the event of a failure. For every operation executed on the database, a 
+-- corresponding log record is created. It is critical to store these logs before the actual transaction operations are applied to the database, 
+-- ensuring data integrity and consistency during recovery processes.
+
+-- For example, consider a transaction to modify a student’s city. This transaction generates the following logs:
+
+-- Start Log: When the transaction begins, a log is created to indicate the start of the transaction.
+-- Format:<Tn, Start>
+-- Here, Tn represents the transaction identifier.
+-- Example: <T1, Start> indicates that Transaction 1 has started.
+
+-- Operation Log: When the city is updated, a log is recorded to capture the old and new values of the operation.
+-- Format:<Tn, Attribute, Old_Value, New_Value>
+-- Example: <T1, City, 'Gorakhpur', 'Noida'> shows that in Transaction 1, the value of the City attribute has changed from 'Gorakhpur' to 'Noida'.
+
+-- Commit Log: Once the transaction is successfully completed, a final log is created to indicate that the transaction has been completed and 
+-- the changes are now permanent.
+-- Format:<Tn, Commit>
+-- Example: <T1, Commit> signifies that Transaction 1 has been successfully completed.
+
+-- These logs play a crucial role in ensuring that the database can recover to a consistent state after a system crash. If a failure occurs, 
+-- the DBMS can use these logs to either roll back incomplete transactions or redo committed transactions to maintain data consistency.
+
+-- Key Operations in Log-Based Recovery: --------------
+-- Undo Operation: The undo operation reverses the changes made by an uncommitted transaction, restoring the database to its previous state.
+
+-- Example of Undo: Consider a transaction T1 that updates a bank account balance but fails before committing:
+
+-- Initial State:
+-- Account balance = 500.
+-- Transaction T1:
+-- Update balance to 600.
+-- Log entry:
+-- <T1, Balance, 500, 600>
+-- Failure:
+-- T1 fails before committing.
+
+-- Undo Process:
+-- Use the old value from the log to revert the change.
+-- Set balance back to 500.
+-- Final log entry after undo:
+-- <T1, Abort>
+
+-- Redo Operation: The redo operation re-applies the changes made by a committed transaction to ensure consistency in the database.
+
+-- Example of Redo: Consider a transaction T2 that updates an account balance but the database crashes before changes are permanently reflected:
+
+-- Initial State:
+-- Account balance = 300.
+-- Transaction T2:
+-- Update balance to 400.
+-- Log entries:
+-- <T2, Start><T2, Balance, 300, 400><T2, Commit>
+-- Crash:
+-- Changes are not reflected in the database.
+
+-- Redo Process:
+-- Use the new value from the log to reapply the committed change.
+-- Set balance to 400.
+
+-- Approaches to Modify the Database:
+-- In database systems, changes to the database can be made using two main methods: Immediate Modification and Deferred Modification.
+
+-- 1. Immediate Modification: In the Immediate Modification method, the database is updated as soon as a change is made during a transaction, 
+-- even before the transaction is committed. Logs are written before making any changes to ensure recovery is possible in case of a system failure.
+
+-- Key Characteristics of Immediate Modification:
+-- Changes Are Applied Immediately: Updates to the database are made as soon as a transaction executes an operation, even before the transaction 
+-- commits.
+-- Requires Undo and Redo for Recovery: Uncommitted changes are reverted using undo, while committed changes are reapplied using redo during 
+-- recovery.
+-- Logs Are Written First: All changes are logged before being applied to ensure recoverability and consistency in case of failure.
+
+-- 2. Deferred Modification: In the Deferred Modification method, changes to the database are not applied immediately. Instead, they are logged 
+-- and stored temporarily. The database is only updated after the transaction is fully committed. This method ensures that no partial changes are 
+-- made to the database, reducing the risk of inconsistency.
+
+-- Key Characteristics of Deferred Modification:
+-- Changes Are Logged First: All updates are recorded in the log before any changes are applied to the database.
+-- Changes Are Applied Only After Commit: No updates are made to the database until the transaction commits. This prevents partial changes in 
+-- case of a failure.
+-- Simpler Recovery Process: Since no changes are applied before commit, only redo operations are needed for recovery.
+
+-- Recovery using Log records: ---------------
+-- Log-based recovery is a method used in database systems to restore the database to a consistent state after a crash or failure. The process 
+-- uses a transaction log, which keeps a record of all operations performed on the database, including updates, inserts, deletes, and transaction 
+-- states (start, commit, or abort).
+
+-- How Log-Based Recovery Works:
+-- Transaction Log:
+-- The log stores all changes made by transactions, ensuring recoverability.
+-- Each transaction’s start, changes (with old and new values), and its commit or abort state are recorded.
+
+-- Recovery Process:
+-- Undo: Transactions that started but didn’t commit (incomplete transactions) are undone to reverse their changes.
+-- Redo: Transactions that committed before the crash are redone to ensure their changes are applied to the database.
+
+-- Advantages of Log based Recovery:
+-- Durability: In the event of a breakdown, the log file offers a dependable and long-lasting method of recovering data. It guarantees that in the 
+-- event of a system crash, no committed transaction is lost.
+-- Faster Recovery: Since log-based recovery recovers databases by replaying committed transactions from the log file, it is typically faster 
+-- than alternative recovery methods.
+-- Incremental Backup: Backups can be made in increments using log-based recovery. Just the changes made since the last backup are kept in the 
+-- log file, rather than creating a complete backup of the database each time.
+-- Lowers the Risk of Data Corruption: By making sure that all transactions are correctly committed or canceled before they are written to the 
+-- database , log-based recovery lowers the risk of data corruption.
+
+-- Disadvantages of Log based Recovery:
+-- Additional overhead: Maintaining the log file incurs an additional overhead on the database system, which can reduce the performance of the system.
+-- Complexity: Log-based recovery is a complex process that requires careful management and administration. If not managed properly, it can lead to 
+-- data inconsistencies or loss.
+-- Storage space: The log file can consume a significant amount of storage space, especially in a database with a large number of transactions.
+-- Time-Consuming: The process of replaying the transactions from the log file can be time-consuming, especially if there are a large number of 
+-- transactions to recover.
+
+-- What is Timestamp Ordering Protocol?
+-- The Timestamp Ordering Protocol is a method used in database systems to order transactions based on their timestamps. A timestamp is a unique 
+-- identifier assigned to each transaction, typically determined using the system clock or a logical counter. Transactions are executed in the 
+-- ascending order of their timestamps, ensuring that older transactions get higher priority.
+
+-- For example:
+-- If Transaction T1 enters the system first, it gets a timestamp TS(T1) = 007 (assumption).
+-- If Transaction T2 enters after T1, it gets a timestamp TS(T2) = 009 (assumption).
+-- This means T1 is “older” than T2 and T1 should execute before T2 to maintain consistency.
+
+-- Key Features of Timestamp Ordering Protocol:
+-- Transaction Priority:
+-- Older transactions (those with smaller timestamps) are given higher priority.
+-- For example, if transaction T1 has a timestamp of 007 times and transaction T2 has a timestamp of 009 times, T1 will execute first as it 
+-- entered the system earlier.
+
+-- Early Conflict Management:
+-- Unlike lock-based protocols, which manage conflicts during execution, timestamp-based protocols start managing conflicts as soon as a 
+-- transaction is created.
+
+-- Advantages of Basic TO Protocol:
+-- Conflict Serializable: Ensures all conflicting operations follow the timestamp order.
+-- Deadlock-Free: Transactions do not wait for resources, preventing deadlocks.
+-- Strict Ordering: Operations are executed in a predefined, conflict-free order based on timestamps.
+
+-- Drawbacks of Basic Timestamp Ordering (TO) Protocol:
+-- Cascading Rollbacks : If a transaction is aborted, all dependent transactions must also be aborted, leading to inefficiency.
+-- Starvation of Newer Transactions : Older transactions are prioritized, which can delay or starve newer transactions.
+-- High Overhead: Maintaining and updating timestamps for every data item adds significant system overhead.
+-- Inefficient for High Concurrency: The strict ordering can reduce throughput in systems with many concurrent transactions.
+
+-- Dirty Read in SQL: ---------------
+-- A Dirty Read in SQL occurs when a transaction reads data that has been modified by another transaction, but not yet committed. In other 
+-- words, a transaction reads uncommitted data from another transaction, which can lead to incorrect or inconsistent results.
+
+-- This situation can occur when a transaction modifies a data item and then fails to commit the changes due to a system failure, network error, 
+-- or other issue. If another transaction reads the modified data before the first transaction has a chance to commit, it can lead to a dirty read.
+
+-- To prevent dirty reads, SQL provides transaction isolation levels, which specify how transactions should be isolated from one another. The 
+-- isolation levels include:
+
+-- Read uncommitted: This level allows transactions to read uncommitted data from other transactions, leading to potential dirty reads.
+-- Read committed: This level allows transactions to read only committed data, preventing dirty reads.
+-- Repeatable read: This level prevents dirty reads and also ensures that a transaction always reads the same data for a given query, even if other 
+-- transactions modify the data in the meantime.
+-- Serializable: This level provides the highest level of isolation and ensures that transactions are executed serially, preventing dirty reads and 
+-- other anomalies.
+-- Dirty reads in SQL can lead to incorrect or inconsistent results and should be prevented through the use of transaction isolation levels. There 
+-- are mainly four types of common concurrency problems: dirty read, lost read, non-repeatable read and phantom reads. 
+-- Dirty Reads – When a transaction is allowed to read a row that has been modified by another transaction that is not been committed yet that time 
+-- Dirty Reads occurred. It is mainly occurred because of multiple transactions at a time which is not committed.
+
+-- Advantages of Dirty Read:
+-- Increased Concurrency: Dirty reads can increase the degree of concurrency in the database system, as transactions are allowed to read 
+-- uncommitted data. This can lead to improved performance and throughput.
+-- Reduced Locking Overhead: Since dirty reads do not require locks, the overhead associated with acquiring and releasing locks can be reduced.
+-- Faster Response Time: Dirty reads can improve the response time of database queries, as transactions can read data without waiting for other 
+-- transactions to commit.
+
+-- Disadvantages of Dirty Read:
+-- Inconsistent Data: Dirty Reads can lead to inconsistent and incorrect data, as transactions may be reading data that has been modified by other 
+-- transactions that have not yet been committed. This can lead to errors and inaccuracies in the database.
+-- Unreliable Results: Dirty reads can lead to unreliable query results, as the data being read may change before the transaction is completed.
+-- Data Integrity Issues: Dirty reads can cause data integrity issues, as transactions may be reading data that is in an inconsistent or incomplete 
+-- state.
+-- Hard to Debug: Dirty reads can be difficult to debug, as the data being read may be inconsistent or incomplete, making it hard to trace the 
+-- source of errors.
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+-- Database Recovery Techniques: ----------------
+-- Types of Recovery Techniques in DBMS: Database recovery techniques are used in database management systems (DBMS) to restore a database 
+-- to a consistent state after a failure or error has occurred. The main goal of recovery techniques is to ensure data integrity and consistency 
+-- and prevent data loss.
+
+-- There are mainly two types of recovery techniques used in DBMS:
+-- Rollback/Undo Recovery Technique.
+-- Commit/Redo Recovery Technique.
+-- CheckPoint Recovery Technique.
+
+-- Rollback/Undo Recovery Technique: The rollback/undo recovery technique is based on the principle of backing out or undoing the effects of a 
+-- transaction that has not been completed successfully due to a system failure or error. This technique is accomplished by undoing the changes 
+-- made by the transaction using the log records stored in the transaction log. The transaction log contains a record of all the transactions 
+-- that have been performed on the database. The system uses the log records to undo the changes made by the failed transaction and restore the 
+-- database to its previous state.
+
+-- Commit/Redo Recovery Technique: The commit/redo recovery technique is based on the principle of reapplying the changes made by a transaction 
+-- that has been completed successfully to the database. This technique is accomplished by using the log records stored in the transaction log 
+-- to redo the changes made by the transaction that was in progress at the time of the failure or error. The system uses the log records to reapply
+-- the changes made by the transaction and restore the database to its most recent consistent state.
+
+-- Checkpoint Recovery Technique: Checkpoint Recoveryis a technique used to improve data integrity and system stability, especially in databases 
+-- and distributed systems. It entails preserving the system’s state at regular intervals, known as checkpoints, at which all ongoing transactions 
+-- are either completed or not initiated. This saved state, which includes memory and CPU registers, is kept in stable, non-volatile storage so 
+-- that it can withstand system crashes. In the event of a breakdown, the system can be restored to the most recent checkpoint, which reduces 
+-- data loss and downtime. The frequency of checkpoint formation is carefully regulated to decrease system overhead while ensuring that recent 
+-- data may be restored quickly.
+
+-- Database Systems: There are both automatic and non-automatic ways for both, backing up data and recovery from any failure situations. The 
+-- techniques used to recover lost data due to system crashes, transaction errors, viruses, catastrophic failure, incorrect command execution, 
+-- etc. are database recovery techniques. So to prevent data loss recovery techniques based on deferred updates and immediate updates or backing 
+-- up data can be used. Recovery techniques are heavily dependent upon the existence of a special file known as a system log. It contains 
+-- information about the start and end of each transaction and any updates which occur during the transaction. The log keeps track of all 
+-- transaction operations that affect the values of database items. This information is needed to recover from transaction failure.
+
+-- The log is kept on disk start_transaction(T): This log entry records that transaction T starts the execution.
+-- read_item(T, X): This log entry records that transaction T reads the value of database item X.
+-- write_item(T, X, old_value, new_value): This log entry records that transaction T changes the value of the database item X from old_value to 
+-- new_value. The old value is sometimes known as a before an image of X, and the new value is known as an afterimage of X.
+-- commit(T): This log entry records that transaction T has completed all accesses to the database successfully and its effect can be committed 
+-- (recorded permanently) to the database.
+-- abort(T): This records that transaction T has been aborted.
+-- checkpoint: A checkpoint is a mechanism where all the previous logs are removed from the system and stored permanently in a storage disk. 
+-- Checkpoint declares a point before which the DBMS was in a consistent state, and all the transactions were committed.
+
+-- A transaction T reaches its commit point when all its operations that access the database have been executed successfully i.e. the transaction 
+-- has reached the point at which it will not abort (terminate without completing). Once committed, the transaction is permanently recorded in the 
+-- database. Commitment always involves writing a commit entry to the log and writing the log to disk. At the time of a system crash, the item is 
+-- searched back in the log for all transactions T that have written a start_transaction(T) entry into the log but have not written a commit(T) 
+-- entry yet; these transactions may have to be rolled back to undo their effect on the database during the recovery process.
+
+-- Undoing: If a transaction crashes, then the recovery manager may undo transactions i.e. reverse the operations of a transaction. This involves 
+-- examining a transaction for the log entry write_item(T, x, old_value, new_value) and setting the value of item x in the database to old-value. 
+-- There are two major techniques for recovery from non-catastrophic transaction failures: deferred updates and immediate updates.
+-- Deferred Update: This technique does not physically update the database on disk until a transaction has reached its commit point. Before 
+-- reaching commit, all transaction updates are recorded in the local transaction workspace. If a transaction fails before reaching its commit 
+-- point, it will not have changed the database in any way so UNDO is not needed. It may be necessary to REDO the effect of the operations that 
+-- are recorded in the local transaction workspace, because their effect may not yet have been written in the database. Hence, a deferred update 
+-- is also known as the No-undo/redo algorithm.
+-- Immediate Update: In the immediate update, the database may be updated by some operations of a transaction before the transaction reaches its 
+-- commit point. However, these operations are recorded in a log on disk before they are applied to the database, making recovery still possible. 
+-- If a transaction fails to reach its commit point, the effect of its operation must be undone i.e. the transaction must be rolled back hence we 
+-- require both undo and redo. This technique is known as undo/redo algorithm.
+-- Caching/Buffering: In this one or more disk pages that include data items to be updated are cached into main memory buffers and then updated 
+-- in memory before being written back to disk. A collection of in-memory buffers called the DBMS cache is kept under the control of DBMS for 
+-- holding these buffers. A directory is used to keep track of which database items are in the buffer. A dirty bit is associated with each buffer, 
+-- which is 0 if the buffer is not modified else 1 if modified.
+-- Shadow Paging: It provides atomicity and durability. A directory with n entries is constructed, where the ith entry points to the ith database 
+-- page on the link. When a transaction began executing the current directory is copied into a shadow directory. When a page is to be modified, a 
+-- shadow page is allocated in which changes are made and when it is ready to become durable, all pages that refer to the original are updated to 
+-- refer new replacement page.
+-- Backward Recovery: The term ” Rollback ” and ” UNDO ” can also refer to backward recovery. When a backup of the data is not available and 
+-- previous modifications need to be undone, this technique can be helpful. With the backward recovery method, unused modifications are removed 
+-- and the database is returned to its prior condition. All adjustments made during the previous traction are reversed during the backward 
+-- recovery. In other words, it reprocesses valid transactions and undoes the erroneous database updates.
+-- Forward Recovery: “ Roll forward “and ” REDO ” refers to forwarding recovery. When a database needs to be updated with all changes verified, 
+-- this forward recovery technique is helpful. Some failed transactions in this database are applied to the database to roll those modifications 
+-- forward. In other words, the database is restored using preserved data and valid transactions counted by their past saves.
+
+-- Backup Techniques: There are different types of Backup Techniques. Some of them are listed below.
+-- Full database Backup: In this full database including data and database, Meta information needed to restore the whole database, including 
+-- full-text catalogs are backed up in a predefined time series.
+-- Differential Backup: It stores only the data changes that have occurred since the last full database backup. When some data has changed many 
+-- times since the last full database backup, a differential backup stores the most recent version of the changed data. For this first, we need 
+-- to restore a full database backup.
+-- Transaction Log Backup: In this, all events that have occurred in the database, like a record of every single statement executed is backed up. 
+-- It is the backup of transaction log entries and contains all transactions that had happened to the database. Through this, the database can 
+-- be recovered to a specific point in time. It is even possible to perform a backup from a transaction log if the data files are destroyed 
+-- and not even a single committed transaction is lost.
+
+-- Starvation in DBMS: Starvation in DBMS is a problem that happens when some processes are unable to get the resources they need because other 
+-- processes keep getting priority. This can happen in situations like locking or scheduling, where some processes keep getting the resources 
+-- first, leaving others waiting indefinitely.
+
+-- Example 1: Imagine you are waiting at a restaurant to place your order. Every time the waiter comes, they serve people who arrived after you 
+-- because they are VIPs or because the waiter is prioritizing large group orders. You’ve been waiting for hours, but your turn never comes. 
+-- This is similar to starvation, where someone is stuck waiting indefinitely while others get served first.
+
+-- Example 2: Suppose there are 3 transactions namely T1, T2, and T3 in a database that is trying to acquire a lock on data item ‘ I ‘. Now, 
+-- suppose the scheduler grants the lock to T1(maybe due to some priority), and the other two transactions are waiting for the lock. As soon 
+-- as the execution of T1 is over, another transaction T4 also comes over and requests a lock on data item I. Now, this time the scheduler 
+-- grants lock to T4, and T2, T3 has to wait again. In this way, if new transactions keep on requesting the lock, T2 and T3 may have to wait 
+-- for an indefinite period of time, which leads to Starvation. 
+
+-- Reasons for Starvation: Starvation in DBMS happens when some transactions or processes are unable to get the resources they need, often 
+-- because other processes are prioritized or due to poor resource management. Here are the main reasons for starvation in simple terms:
+
+-- Unfair Prioritization: If lower-priority processes keep competing with higher-priority ones, they might be ignored for a long time, leading to 
+-- indefinite waiting.
+-- Inappropriate Locking Strategy: When resources are managed poorly, such as using a priority queue, lower-priority processes may never get 
+-- access to locked resources.
+-- Uncontrolled Resource Allocation: If processes keep passing resources to others without considering the system’s overall needs, some processes 
+-- might never get the resources they require.
+-- Queue Mismanagement: If resources are always passed to the next process in a queue, new processes keep getting added, and some may end up 
+-- waiting indefinitely.
+-- Repeated Victim Selection: Sometimes, the same transaction is repeatedly chosen as a “victim” during resource allocation, causing it to 
+-- stay stuck without progress.
+-- Resource Leakage: If resources are lost or mismanaged due to system errors, there may not be enough available to meet the demands of all 
+-- processes. High Demand vs. Limited Resources: If the demand for resources is much higher than the supply, no matter how well resources are managed, 
+-- some processes will inevitably experience starvation.
+-- Random Resource Allocation: If resources are assigned randomly instead of following a proper queue, some processes may end up waiting much 
+-- longer than others.
+-- Denial-of-Service Attacks: Intentional attacks can overwhelm the system, making it impossible for legitimate processes to get the resources 
+-- they need, causing starvation.
+
+-- Solutions to starvation
+-- Increase Priority Over Time: If a process or transaction has been waiting too long, its priority can be gradually increased. This ensures it 
+-- will eventually be served. However, care should be taken as newer processes may end up waiting longer.
+-- Modification in Victim Selection algorithm: If a transaction has been a victim of repeated selections, then the algorithm can be modified by 
+-- lowering its priority over other transactions.
+-- First Come First Serve approach: A fair scheduling approach i.e. FCFS can be adopted, In which the transaction can acquire a lock on an item 
+-- in the order, in which the requested lock.
+-- Wait-die and wound wait scheme: These techniques use timestamps to decide the order of resource allocation, ensuring older transactions are 
+-- prioritized, which helps prevent starvation. 
+-- Timeout Mechanism: A timeout mechanism can be implemented in which a transaction is only allowed to wait for a certain amount of time before 
+-- it is aborted or restarted. This ensures that no transaction waits indefinitely, and prevents the possibility of starvation.
+-- Resource Reservation: A resource reservation scheme can be used to allocate resources to a transaction before it starts execution. This 
+-- ensures that the transaction has access to the necessary resources and reduces the chances of waiting for a resource indefinitely.
+-- Preemption: Preemption involves the forcible removal of a lock from a transaction that has been waiting for a long time, in favor of another 
+-- transaction that has a higher priority or has been waiting for a shorter time. Preemption ensures that no transaction waits indefinitely,
+--  and prevents the possibility of starvation.
+-- Dynamic Lock Allocation: In this approach, locks are allocated dynamically based on the current state of the system. The system may analyze 
+-- the current lock requests and allocate locks in such a way that prevents deadlocks and reduces the chances of starvation.
+-- Parallelism: By allowing multiple transactions to execute in parallel, the system can ensure that no transaction waits indefinitely, and 
+-- reduces the chances of starvation. This approach requires careful consideration of the potential for conflicts and race conditions between 
+-- transactions.
+
+-- Disadvantages of Starvation
+-- Decreased performance: Starvation can cause decreased performance in a DBMS by preventing transactions from making progress and causing a 
+-- bottleneck.
+-- Increased response time: Starvation can increase response time for transactions that are waiting for resources, leading to poor user 
+-- experience and decreased productivity.
+-- Inconsistent data: If a transaction is unable to complete due to starvation, it may leave the database in an inconsistent state, which can 
+-- lead to data corruption and other problems.
+-- Difficulty in troubleshooting: Starvation can be difficult to troubleshoot because it may not be immediately apparent which transaction is 
+-- causing the problem.
+-- Potential for deadlock: If multiple transactions are competing for the same resources, starvation can lead to deadlock, where none of the 
+-- transactions can proceed, causing a complete system failure.
+
