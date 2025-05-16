@@ -563,23 +563,31 @@ VALUES (
 SELECT * FROM Emp3;
 
 -- SQL UNION Operator:
-SELECT Country FROM Emp1
+SELECT Country
+FROM Emp1
 UNION
-SELECT Country FROM Emp2
+SELECT Country
+FROM Emp2
 ORDER BY Country;
 
 -- SQL UNION ALL:
-SELECT Country FROM Emp1 
+SELECT Country
+FROM Emp1
 UNION ALL
-SELECT Country FROM Emp2 
+SELECT Country
+FROM Emp2
 ORDER BY Country;
 
 -- SQL UNION ALL with WHERE:
-SELECT Country, Name FROM Emp1
-WHERE Name='Aditya'
+SELECT Country, Name
+FROM Emp1
+WHERE
+    Name = 'Aditya'
 UNION ALL
-SELECT Country, Name FROM Emp2
-WHERE Country='Ireland'
+SELECT Country, Name
+FROM Emp2
+WHERE
+    Country = 'Ireland'
 ORDER BY Country;
 
 -- The SQL UNION operator combines the result sets of two or more SELECT queries.
@@ -590,7 +598,7 @@ ORDER BY Country;
 
 -- UNION ALL Operator: -------------
 -- The SQL UNION ALL command combines the result of two or more SELECT statements in SQL.
--- For performing the UNION ALL operation, it is necessary that both the SELECT statements should have an equal number of columns/fields, 
+-- For performing the UNION ALL operation, it is necessary that both the SELECT statements should have an equal number of columns/fields,
 -- otherwise, the resulting expression will result in an error.
 
 -- Syntax: SELECT columns FROM table1
@@ -598,19 +606,19 @@ ORDER BY Country;
 -- SELECT columns FROM table2;
 
 -- Single Field With Same Name:
-SELECT NAME FROM STUDENTS
-UNION ALL
-SELECT NAME FROM TRIP_DETAIL;
+SELECT NAME FROM STUDENTS UNION ALL SELECT NAME FROM TRIP_DETAIL;
 
 -- Different Field Names:
-SELECT ROLL_NO AS Identifier FROM STUDENTS
+SELECT ROLL_NO AS Identifier
+FROM STUDENTS
 UNION ALL
-SELECT ROLL_NO AS Identifier FROM TRIP_DETAIL;
+SELECT ROLL_NO AS Identifier
+FROM TRIP_DETAIL;
 
 -- UNION ALL command helps us to combine results of two or more SELECT statements from different tables.
--- The UNION ALL command includes the duplicate records from the SELECT statements whereas the UNION command does not include duplicate records 
+-- The UNION ALL command includes the duplicate records from the SELECT statements whereas the UNION command does not include duplicate records
 -- otherwise both the commands are same.
--- For performing the UNION ALL operation, it is necessary that both the SELECT statements should have equal number of columns otherwise the 
+-- For performing the UNION ALL operation, it is necessary that both the SELECT statements should have equal number of columns otherwise the
 -- resulting expression will result in an error.
 
 -- SQL UNION All vs UNION:
@@ -631,4 +639,397 @@ SELECT ROLL_NO AS Identifier FROM TRIP_DETAIL;
 -- Higher, due to additional steps for duplicate removal
 -- Combined rows from all SELECT statements, without duplicates
 -- Useful when data integrity requires unique records in the result set
+
+-- SQL EXCEPT: -------------
+-- The SQL EXCEPT operator allows you to return the rows that exist in the first result set but not in the second. It is useful for finding records
+-- in one table that do not have corresponding records in another table.
+
+-- Syntax:
+-- SELECT column_name(s) FROM table1
+-- EXCEPT
+-- SELECT column_name(s) FROM table2;
+
+-- Note: The two SELECT queries must return the same number of columns and the data types must be compatible.
+
+CREATE TABLE Students_tab (
+    StudentID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Course VARCHAR(100)
+);
+
+-- Insert Data into Students Table
+INSERT INTO
+    Students_tab (StudentID, Name, Course)
+VALUES (1, 'Rohan', 'DBMS'),
+    (2, 'Kevin', 'OS'),
+    (3, 'Mansi', 'DBMS'),
+    (4, 'Mansi', 'ADA'),
+    (5, 'Rekha', 'ADA'),
+    (6, 'Megha', 'OS');
+
+CREATE TABLE TA (
+    StudentID INT PRIMARY KEY,
+    Name VARCHAR(100),
+    Course VARCHAR(100)
+);
+
+-- Insert Data into TA Table
+INSERT INTO
+    TA (StudentID, Name, Course)
+VALUES (1, 'Kevin', 'TOC'),
+    (2, 'Sita', 'IP'),
+    (3, 'Manik', 'AP'),
+    (4, 'Rekha', 'SNS');
+
+-- Filter Student:
+SELECT Name FROM Students_tab EXCEPT SELECT Name FROM TA;
+
+-- Retaining Duplicates with EXCEPTALL: By default, EXCEPT removes duplicates from the result set. To retain duplicates, you can use EXCEPT
+-- ALL instead.
+
+SELECT Name FROM Students_tab EXCEPT ALL SELECT Name FROM TA;
+
+-- SQL EXCEPT vs. SQL NOT IN:
+-- EXCEPT:
+-- Removes duplicates from the result.
+-- Generally more efficient for large datasets as it processes only the required rows.
+-- When you need to find rows that exist in one result set but not the other.
+-- Not supported by MySQL.
+
+-- NOT IN:
+-- Retains duplicates in the result.
+-- May be slower for large datasets, especially when checking multiple conditions.
+-- When you need to check a specific column’s values against a list.
+-- Supported by most SQL databases.
+
+-- EXCEPT returns rows from the first result set that are not in the second result set.
+-- EXCEPT automatically removes duplicates, while EXCEPT ALL retains duplicates.
+-- EXCEPT requires both queries to have the same number of columns and compatible data types.
+-- EXCEPT is not supported in MySQL, while NOT IN can be used as an alternative.
+-- Use EXCEPT when you need to exclude certain rows efficiently from the first result set, especially in larger datasets.
+
+-- BETWEEN Operator: -------------
+-- The SQL BETWEEN operator is used to filter the result set within a specified range.
+-- It can be applied to numeric, date, and text columns.
+-- The BETWEEN operator is inclusive, meaning it includes the start and end values in the result set.
+
+-- Syntax:
+-- SELECT column_name(s) FROM table_name
+-- WHERE column_name BETWEEN value1 AND value2;
+
+-- NOT BETWEEN Text Values:
+
+SELECT FirstName, LastName
+FROM Employees
+WHERE
+    LastName NOT BETWEEN 'B' AND 'S';
+
+--  BETWEEN Dates:
+SELECT FirstName, LastName, HireDate
+FROM Employees
+WHERE
+    HireDate BETWEEN '2020-01-01' AND '2021-12-31';
+
+-- NOT BETWEEN:
+SELECT FirstName, LastName, Age
+FROM Employees
+WHERE
+    Age NOT BETWEEN 30 AND 40;
+
+-- BETWEEN with IN:
+SELECT FirstName, LastName, Salary
+FROM Employees
+WHERE
+    Salary BETWEEN 50000 AND 70000
+    AND FirstName IN ('John', 'Sue', 'Tom');
+
+-- ALL Operator: -------------
+-- The ALL operator is used to compare a value with all the values returned by a subquery. The condition will be evaluated to TRUE if the value
+-- meets the specified condition for every value in the result set of the subquery.
+-- The ALL must be preceded by comparison operators and evaluates true if all of the subqueries values meet the condition.
+-- ALL is used with SELECT, WHERE, and HAVING statements.
+
+-- Syntax:
+-- SELECT column_name(s) FROM table_name
+-- WHERE column_name comparison_operator ALL
+-- (SELECT column_name FROM table_name WHERE condition(s));
+
+-- Retrieve all product names from the Products table:
+SELECT ALL ProductName FROM Products WHERE TRUE;
+
+-- Retrieve product names if all records in the OrderDetails table have a quantity of 6 or 2:
+SELECT ProductName
+FROM Products
+WHERE
+    ProductID = ALL (
+        SELECT ProductID
+        FROM OrderDetails
+        WHERE
+            Quantity = 6
+            OR Quantity = 2
+    );
+
+-- Find the OrderIDs where the maximum quantity in the order exceeds the average quantity of all orders:
+SELECT OrderID
+FROM OrderDetails
+GROUP BY
+    OrderID
+HAVING
+    MAX(Quantity) > ALL (
+        SELECT AVG(Quantity)
+        FROM OrderDetails
+        GROUP BY
+            OrderID
+    );
+
+-- ANY Operator: -------------
+-- ANY compares a value to each value in a list or results from a query and evaluates to true if the result of an inner query contains at least
+-- one row.
+-- ANY return true if any of the subqueries values meet the condition.
+-- ANY must be preceded by comparison operators.
+
+-- Syntax:
+-- SELECT column_name(s) FROM table_name
+-- WHERE column_name comparison_operator ANY
+-- (SELECT column_name FROM table_name WHERE condition(s));
+
+-- Find distinct category IDs of products that appear in the OrderDetails table:
+SELECT DISTINCT
+    CategoryID
+FROM Products
+WHERE
+    ProductID = ANY (
+        SELECT ProductID
+        FROM OrderDetails
+    );
+
+-- Find product names with a quantity of 9 in the OrderDetails table:
+SELECT ProductName
+FROM Products
+WHERE
+    ProductID = ANY (
+        SELECT ProductID
+        FROM OrderDetails
+        WHERE
+            Quantity = 9
+    );
+
+-- Differences Between SQL ALL and ANY:
+-- ALL requires that the condition be true for every value in the subquery result, while ANY only needs the condition to be true for at least one
+-- value in the subquery.
+-- ALL is used when you want to compare a value against all values in the subquery, while ANY is useful when you want to compare a value against
+-- any one of the values.
+
+-- SQL INTERSECT: -------------
+-- The INTERSECT clause in SQL is used to combine two SELECT statements but the dataset returned by the INTERSECT statement will be the
+-- intersection of the data sets of the two SELECT statements. In simple words, the INTERSECT statement will return only those rows that will be
+-- common to both of the SELECT statements.
+
+-- The INTERSECT operator is a set operation in SQL, similar to UNION and EXCEPT. While UNION combines results from two queries and removes
+-- duplicates, INTERSECT returns only the records that exist in both queries, ensuring uniqueness.
+
+-- Key Characteristics of SQL INTERSECT:
+-- Returns only the common rows between two result sets.
+-- Ensures uniqueness by automatically removing duplicate rows.
+-- Requires that both SELECT statements have the same number of columns.
+-- The data types of corresponding columns in both queries must be compatible.
+
+-- Syntax:
+-- SELECT column1 , column2 …. FROM table1 WHERE condition
+-- INTERSECT
+-- SELECT column1 , column2 …. FROM table2 WHERE condition
+
+-- Basic INTERSECT Query:
+SELECT CustomerID
+FROM Customers INTERSECT
+SELECT CustomerID
+FROM Orders;
+
+-- Using INTERSECT with BETWEEN Operator:
+SELECT CustomerID
+FROM Customers
+WHERE
+    CustomerID BETWEEN 3 AND 8  INTERSECT
+SELECT CustomerID
+FROM Orders;
+
+-- Column Count & Data Types: Both SELECT statements must have the same number of columns with compatible data types.
+-- Performance Considerations: INTERSECT can be slower on large datasets as it performs row-by-row comparison. Indexing can help optimize
+-- performance.
+-- NULL Handling: Unlike comparison operators, INTERSECT treats NULL values as equal, meaning if both queries return a row with NULL, it will
+-- be included in the result.
+-- Alternative Approach: In cases where INTERSECT is not supported (e.g., MySQL), you can achieve the same result usingINNER JOIN.
+
+-- SQL EXISTS: -------------
+-- The EXISTS condition is primarily used to check the existence of rows returned by a subquery. It’s commonly used in scenarios where you need to
+-- check if a record exists in a related table, and you want to perform an action based on that result.
+
+-- Syntax:
+-- SELECT column_name(s) FROM table_name
+-- WHERE EXISTS (SELECT column_name(s) FROM subquery_table WHERE condition);
+
+-- Using EXISTS with SELECT:
+SELECT fname, lname
+FROM Customers
+WHERE
+    EXISTS (
+        SELECT *
+        FROM Orders
+        WHERE
+            Customers.customer_id = Orders.c_id
+    );
+
+-- Using NOT with EXISTS:
+SELECT lname, fname
+FROM Customers
+WHERE
+    NOT EXISTS (
+        SELECT *
+        FROM Orders
+        WHERE
+            Customers.customer_id = Orders.c_id
+    );
+
+-- Using EXISTS condition with DELETE statement:
+DELETE FROM Orders
+WHERE
+    EXISTS (
+        SELECT *
+        FROM customers
+        WHERE
+            Customers.customer_id = Orders.c_id
+            AND Customers.lname = 'Mehra'
+    );
+
+-- Using EXISTS condition with UPDATE statement:
+UPDATE Customers
+SET
+    lname = 'Kumari'
+WHERE
+    EXISTS (
+        SELECT *
+        FROM Customers
+        WHERE
+            customer_id = 401
+    );
+
+-- Checking Data Existence: You can use EXISTS to check if related data exists in another table before performing an action (e.g., selecting,
+-- updating, deleting).
+-- Performance: EXISTS is often more efficient than using IN when dealing with large datasets, as it stops searching once a match is found.
+-- Correlated Subqueries: EXISTS is ideal for correlated subqueries, where the subquery refers to the outer query’s values.
+
+-- Differences Between EXISTS and IN:
+-- EXISTS is used for checking the existence of rows, while IN checks if a value matches any value from a list or subquery result.
+-- EXISTS is more efficient when the subquery results in a large number of rows.
+-- IN works well for small datasets or static lists of values.
+
+-- CASE Statement in SQL: -------------
+-- The CASE statement in SQL is a conditional expression that allows you to perform conditional logic within a query.
+-- It is commonly used to create new columns based on conditional logic, provide custom values, or control query outputs based on certain conditions.
+-- If no condition is true then the ELSE part will be executed. If there is no ELSE part then it returns NULL.
+
+-- Syntax:
+-- CASE case_value
+-- WHEN condition THEN result1
+-- WHEN condition THEN result2
+-- …
+-- Else result
+-- END CASE;
+
+CREATE TABLE Customer_demo (
+    CustomerID INT PRIMARY KEY,
+    CustomerName VARCHAR(50),
+    LastName VARCHAR(50),
+    Country VARCHAR(50),
+    Age int(2),
+    Phone varchar(10)
+);
+-- Insert some sample data into the Customers table
+INSERT INTO
+    Customer_demo (
+        CustomerID,
+        CustomerName,
+        LastName,
+        Country,
+        Age,
+        Phone
+    )
+VALUES (
+        1,
+        'Shubham',
+        'Thakur',
+        'India',
+        '23',
+        'xxxxxxxxxx'
+    ),
+    (
+        2,
+        'Aman ',
+        'Chopra',
+        'Australia',
+        '21',
+        'xxxxxxxxxx'
+    ),
+    (
+        3,
+        'Naveen',
+        'Tulasi',
+        'Sri lanka',
+        '24',
+        'xxxxxxxxxx'
+    ),
+    (
+        4,
+        'Aditya',
+        'Arpan',
+        'Austria',
+        '21',
+        'xxxxxxxxxx'
+    ),
+    (
+        5,
+        'Nishant. Salchichas S.A.',
+        'Jain',
+        'Spain',
+        '22',
+        'xxxxxxxxxx'
+    );
+
+-- Simple CASE Expression:
+SELECT
+    CustomerName,
+    Age,
+    CASE
+        WHEN Country = "India" THEN 'Indian'
+        ELSE 'Foreign'
+    END AS Nationality
+FROM Customer;
+
+-- SQL CASE When Multiple Conditions:
+SELECT
+    CustomerName,
+    Age,
+    CASE
+        WHEN Age > 22 THEN 'The Age is greater than 22'
+        WHEN Age = 21 THEN 'The Age is 21'
+        ELSE 'The Age is over 30'
+    END AS QuantityText
+FROM Customer;
+
+-- CASE Statement With ORDER BY Clause:
+SELECT CustomerName, Country
+FROM Customer
+ORDER BY (
+        CASE
+            WHEN Country IS "India" THEN Country
+            ELSE Age
+        END
+    );
+
+-- The SQL CASE statement is a conditional expression that allows for the execution of different queries based on specified conditions.
+-- There should always be a SELECT in the CASE statement.
+-- END ELSE is an optional component but WHEN THEN these cases must be included in the CASE statement.
+-- We can make any conditional statement using any conditional operator (like WHERE ) between WHEN and THEN. This includes stringing together 
+-- multiple conditional statements using AND and OR.
+-- We can include multiple WHEN statements and an ELSE statement to counter with unaddressed conditions.
 
